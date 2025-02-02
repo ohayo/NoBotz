@@ -41,9 +41,9 @@ namespace NoBotz.Core
 
             Watchdog.Configuration.Reload();
 
+            ServerApi.Hooks.NetGreetPlayer.Register(this, new HookHandler<GreetPlayerEventArgs>(Watchdog.OnNetGreetPlayer));
             ServerApi.Hooks.NetGetData.Register(this, new HookHandler<GetDataEventArgs>(Watchdog.OnNetGetData));
             ServerApi.Hooks.ServerLeave.Register(this, new HookHandler<LeaveEventArgs>(Watchdog.OnPlayerLeave));
-
             PlayerHooks.PlayerCommand += Watchdog.OnPlayerCommand;
             PlayerHooks.PlayerChat += Watchdog.OnPlayerChat;
 
@@ -57,6 +57,7 @@ namespace NoBotz.Core
                 if (Watchdog.Configuration != null)
                     Watchdog.Configuration.Save();
 
+                ServerApi.Hooks.NetGreetPlayer.Deregister(this, new HookHandler<GreetPlayerEventArgs>(Watchdog.OnNetGreetPlayer));
                 ServerApi.Hooks.NetGetData.Deregister(this, new HookHandler<GetDataEventArgs>(Watchdog.OnNetGetData));
                 ServerApi.Hooks.ServerLeave.Deregister(this, new HookHandler<LeaveEventArgs>(Watchdog.OnPlayerLeave));
 

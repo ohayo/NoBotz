@@ -23,6 +23,8 @@ namespace NoBotz.Helpers
 
         public static List<HumanPlayer> Players { get; set; }
 
+        public static List<string> BlockedTemporarily = new List<string>();
+
         static Watchdog()
         {
             Players = new List<HumanPlayer>();
@@ -138,9 +140,42 @@ namespace NoBotz.Helpers
                 return;
 
             HumanPlayer? humanPlayer = GetHumanPlayerByIndex(playerSlot);
+            var player = TShock.Players[playerSlot];
 
-            if (TShock.Players[playerSlot] != null && TShock.Players[playerSlot].Active)
+            if (player != null && player.Active)
+            {
+                var ip = player.IP;
                 TShock.Players[playerSlot].Kick(message);
+
+                if (Configuration.BlockTemporarilyOnTrip && !BlockedTemporarily.Contains(ip))
+                {
+                    BlockedTemporarily.Add(ip);
+
+                    if (Configuration.DisconnectAllFromSameIPOnBlock)
+                    {
+                        List<HumanPlayer> HumanPlayers = LookupHumanPlayersByIP(ip);
+
+                        if (HumanPlayers.Count > 0)
+                        {
+                            foreach(var humanePlayer in HumanPlayers)
+                            {
+                                TShock.Log.ConsoleInfo($"{humanePlayer.Player.Name} kicked due to disconnect all from same ip on block predicament");
+
+                                Kick(humanePlayer.Player.Index, "Invalid positioning sent from client");
+                            }
+                        }
+                    }
+
+                    new Thread(() =>
+                    {
+                        Thread.Sleep(Configuration.TimeoutInMSUntilBlockRemoved);
+
+                        BlockedTemporarily.Remove(ip);
+
+                        TShock.Log.ConsoleInfo($"{ip} has been removed from the blocked temporarily list. They can now join.");
+                    }).Start();
+                }
+            }
 
             if (humanPlayer != null)
                 Players.Remove(humanPlayer);
@@ -155,9 +190,33 @@ namespace NoBotz.Helpers
                 return;
 
             HumanPlayer? humanPlayer = GetHumanPlayerByIndex(playerSlot);
+            var player = TShock.Players[playerSlot];
 
-            if (TShock.Players[playerSlot] != null && TShock.Players[playerSlot].Active)
+            if (player != null && player.Active)
+            {
+                var ip = player.IP;
                 TShock.Players[playerSlot].Kick(message);
+
+                if (Configuration.BlockTemporarilyOnTrip && !BlockedTemporarily.Contains(ip))
+                {
+                    BlockedTemporarily.Add(ip);
+
+                    if (Configuration.DisconnectAllFromSameIPOnBlock)
+                    {
+                        List<HumanPlayer> HumanPlayers = LookupHumanPlayersByIP(ip);
+
+                        if (HumanPlayers.Count > 0)
+                        {
+                            foreach (var humanePlayer in HumanPlayers)
+                            {
+                                TShock.Log.ConsoleInfo($"{humanePlayer.Player.Name} kicked due to disconnect all from same ip on block predicament");
+
+                                Kick(humanePlayer.Player.Index, "Invalid positioning sent from client");
+                            }
+                        }
+                    }
+                }
+            }
 
             if (humanPlayer != null)
                 Players.Remove(humanPlayer);
@@ -171,6 +230,24 @@ namespace NoBotz.Helpers
             };
 
             return packets.Contains(packetType);
+        }
+
+        public static void OnNetGreetPlayer(GreetPlayerEventArgs e)
+        {
+            var player = TShock.Players[e.Who];
+
+            if (player == null)
+            {
+                e.Handled = true;
+                return;
+            }
+
+            if (BlockedTemporarily.Contains(player.IP))
+            {
+                Kick(e.Who, "Server is full.");
+                e.Handled = true;
+                return;
+            }
         }
 
         public static void OnNetGetData(GetDataEventArgs e)

@@ -13,6 +13,12 @@ namespace NoBotz.Misc
         [JsonIgnore]
         private readonly string? _configPath;
 
+        public bool BlockTemporarilyOnTrip { get; set; }
+
+        public int TimeoutInMSUntilBlockRemoved { get; set; }
+
+        public bool DisconnectAllFromSameIPOnBlock { get; set; }
+
         public bool KickOnTrip { get; set; }
 
         public bool EnforcePacketLengthLimits { get; set; }
@@ -47,6 +53,9 @@ namespace NoBotz.Misc
 
             File.WriteAllText(_configPath, JsonSerializer.Serialize(new Configuration(string.Empty)
             {
+                BlockTemporarilyOnTrip = true,
+                DisconnectAllFromSameIPOnBlock = true,
+                TimeoutInMSUntilBlockRemoved = 1000 * 60 * 2,
                 KickOnTrip = true,
                 EnforcePacketLengthLimits = false,
                 EnforceSpawningPlayer = true,
@@ -69,7 +78,7 @@ namespace NoBotz.Misc
                         { 50, 50 },   // Player Buff
                         { 51, 50 },   // Special NPC Effect
                         { 55, 50 },   // Add Player Buff
-                        { 58, 50 },   // Play Music Item
+                        { 58, 100 },   // Play Music Item
                         { 62, 50 },   // Player Dodge
                         { 66, 20 },   // Heal Other Player
                         { 96, 30 },   // Player Teleport Portal
@@ -107,6 +116,9 @@ namespace NoBotz.Misc
 
                 if (loadedConfig != null)
                 {
+                    BlockTemporarilyOnTrip = loadedConfig.BlockTemporarilyOnTrip;
+                    TimeoutInMSUntilBlockRemoved = loadedConfig.TimeoutInMSUntilBlockRemoved;
+                    DisconnectAllFromSameIPOnBlock = loadedConfig.DisconnectAllFromSameIPOnBlock;
                     KickOnTrip = loadedConfig.KickOnTrip;
                     EnforcePacketLengthLimits = loadedConfig.EnforcePacketLengthLimits;
                     EnforceSpawningPlayer = loadedConfig.EnforceSpawningPlayer;

@@ -8,7 +8,12 @@
   - Security thresholds
   - Other anti-bot mechanisms
 
-**It is highly recommended that you adjust the values in NoBots.json to fit your server's needs. <br>
+ ## Modifying the packet ratelimits <br>
+ - The packet ratelimits work on a dictionary mapping of packet type (as an int) to their maximum value per the timeframe configured. (Which is 60000ms by default or 1 minute) <br>
+ - You can modify these in PacketTypeToMaxPerTimeFrame. Just add a new packet type mapped to its maximum value per timeframe, or modify an existing entry. <br>
+ - There are also some fake packet IDs for things like chat (assigned packet type 201) and particles (assigned packet type 202) because they are net modules.
+ 
+ **It is highly recommended that you adjust the values in NoBots.json to fit your server's needs. <br>
  There is no universal "sweet spot" for every server so tweak the limits and timeframes to minimize the rate of false positives.**
 
  If you only want notifications about suspicious activity without kicking players, set "KickOnTrip" to false. An option to temporarily ban the player from the server will be added soon.

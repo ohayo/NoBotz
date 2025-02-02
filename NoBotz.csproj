@@ -7,24 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Reference Include="HttpServer">
-      <HintPath>C:\Users\noia\Downloads\TShock-5.2.2-for-Terraria-1.4.4.9-win-amd64-Release\bin\HttpServer.dll</HintPath>
-    </Reference>
-    <Reference Include="ModFramework">
-      <HintPath>C:\Users\noia\Downloads\TShock-5.2.2-for-Terraria-1.4.4.9-win-amd64-Release\bin\ModFramework.dll</HintPath>
-    </Reference>
-    <Reference Include="OTAPI">
-      <HintPath>C:\Users\noia\Downloads\TShock-5.2.2-for-Terraria-1.4.4.9-win-amd64-Release\bin\OTAPI.dll</HintPath>
-    </Reference>
-    <Reference Include="OTAPI.Runtime">
-      <HintPath>C:\Users\noia\Downloads\TShock-5.2.2-for-Terraria-1.4.4.9-win-amd64-Release\bin\OTAPI.Runtime.dll</HintPath>
-    </Reference>
-    <Reference Include="TerrariaServer">
-      <HintPath>C:\Users\noia\Downloads\TShock-5.2.2-for-Terraria-1.4.4.9-win-amd64-Release\bin\TerrariaServer.dll</HintPath>
-    </Reference>
-    <Reference Include="TShockAPI">
-      <HintPath>C:\Users\noia\Downloads\TShock-5.2.2-for-Terraria-1.4.4.9-win-amd64-Release\ServerPlugins\TShockAPI.dll</HintPath>
-    </Reference>
+    <PackageReference Include="TShock" Version="5.2.2" />
   </ItemGroup>
 
 </Project>

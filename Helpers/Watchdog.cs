@@ -161,7 +161,7 @@ namespace NoBotz.Helpers
                             {
                                 TShock.Log.ConsoleInfo($"{humanePlayer.Player.Name} kicked due to disconnect all from same ip on block predicament");
 
-                                Kick(humanePlayer.Player.Index, "Invalid positioning sent from client");
+                                player.Kick("Invalid positioning sent from client");
                             }
                         }
                     }
@@ -181,47 +181,6 @@ namespace NoBotz.Helpers
                 Players.Remove(humanPlayer);
         }
 
-        private static void Kick(int playerSlot, string message)
-        {
-            if (Configuration == null || !Configuration.KickOnTrip)
-                return;
-
-            if (playerSlot == 255)
-                return;
-
-            HumanPlayer? humanPlayer = GetHumanPlayerByIndex(playerSlot);
-            var player = TShock.Players[playerSlot];
-
-            if (player != null && player.Active)
-            {
-                var ip = player.IP;
-                TShock.Players[playerSlot].Kick(message);
-
-                if (Configuration.BlockTemporarilyOnTrip && !BlockedTemporarily.Contains(ip))
-                {
-                    BlockedTemporarily.Add(ip);
-
-                    if (Configuration.DisconnectAllFromSameIPOnBlock)
-                    {
-                        List<HumanPlayer> HumanPlayers = LookupHumanPlayersByIP(ip);
-
-                        if (HumanPlayers.Count > 0)
-                        {
-                            foreach (var humanePlayer in HumanPlayers)
-                            {
-                                TShock.Log.ConsoleInfo($"{humanePlayer.Player.Name} kicked due to disconnect all from same ip on block predicament");
-
-                                Kick(humanePlayer.Player.Index, "Invalid positioning sent from client");
-                            }
-                        }
-                    }
-                }
-            }
-
-            if (humanPlayer != null)
-                Players.Remove(humanPlayer);
-        }
-
         private static bool NecessaryPacket(int packetType)
         {
             HashSet<int> packets = new()
@@ -230,24 +189,6 @@ namespace NoBotz.Helpers
             };
 
             return packets.Contains(packetType);
-        }
-
-        public static void OnNetGreetPlayer(GreetPlayerEventArgs e)
-        {
-            var player = TShock.Players[e.Who];
-
-            if (player == null)
-            {
-                e.Handled = true;
-                return;
-            }
-
-            if (BlockedTemporarily.Contains(player.IP))
-            {
-                Kick(e.Who, "Server is full.");
-                e.Handled = true;
-                return;
-            }
         }
 
         public static void OnNetGetData(GetDataEventArgs e)
@@ -323,10 +264,16 @@ namespace NoBotz.Helpers
                 {
                     TShock.Log.ConsoleInfo($"{player.Name} broke the max client per IP threshold!");
 
-                    Kick(player.Index, "Broke the max client threshold. Contact server staff if you require an exemption.");
+                    Kick(e.PlayerId, "Broke the max client threshold. Contact server staff if you require an exemption.");
                     e.Handled = true;
                     return;
                 }
+            }
+
+            if (BlockedTemporarily.Contains(player.IP))
+            {
+                e.Handled = true;
+                return;
             }
 
             HumanPlayer? humanPlayer = GetHumanPlayer(player);
@@ -347,7 +294,7 @@ namespace NoBotz.Helpers
                         {
                             TShock.Log.ConsoleInfo($"Detected spawn player bypass from {e.Player.Name}");
 
-                            Kick(e.Player.Index, "Character Abnormality Detected");
+                            Kick(e.PlayerId, "Character Abnormality Detected");
                             return;
                         }
                     }).Start();

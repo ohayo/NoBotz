@@ -54,7 +54,7 @@ namespace NoBotz.Misc
                 KickPacketsFromHandshakeBypass = true,
                 MaxClientsPerIP = 1,
                 MaxSecondsUntilSpawnNecessary = 5,
-                TimeframeForPacketsInMs = 1000 * 60 * 60, //Per minute
+                TimeframeForPacketsInMs = 1000 * 60, //Per minute
                 PacketTypeToMaxPerTimeFrame = new Dictionary<int, int>() //Max packet amounts from a player per minute
                     {
                         { 24, 100 },   // Strike NPC with held item

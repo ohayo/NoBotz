@@ -41,6 +41,8 @@ namespace NoBotz.Core
 
             Watchdog.Configuration.Reload();
 
+            Commands.ChatCommands.Add(new Command(Permissions.cfgreload, HandleConfigReload, "nobots-reload"));
+
             ServerApi.Hooks.NetGetData.Register(this, new HookHandler<GetDataEventArgs>(Watchdog.OnNetGetData));
             ServerApi.Hooks.ServerLeave.Register(this, new HookHandler<LeaveEventArgs>(Watchdog.OnPlayerLeave));
             PlayerHooks.PlayerCommand += Watchdog.OnPlayerCommand;
@@ -66,6 +68,19 @@ namespace NoBotz.Core
             }
 
             base.Dispose(disposing);
+        }
+
+        public void HandleConfigReload(CommandArgs args)
+        {
+            if (Watchdog.Configuration == null)
+                return;
+
+            if (!File.Exists(Path.Combine(TShock.SavePath, "NoBots.json")))
+                Watchdog.Configuration.Setup();
+
+            Watchdog.Configuration.Reload();
+
+            args.Player.SendSuccessMessage("NoBotz configuration has been reloaded successfully.");
         }
     }
 }

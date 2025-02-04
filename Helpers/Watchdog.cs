@@ -56,7 +56,7 @@ namespace NoBotz.Helpers
 
         public static void OnPlayerCommand(PlayerCommandEventArgs e)
         {
-            if (e.Player == null || Configuration == null)
+            if (e.Player == null || Configuration == null || !Configuration.Enabled)
                 return;
 
             byte playerSlot = (byte)e.Player.Index;
@@ -88,7 +88,7 @@ namespace NoBotz.Helpers
 
         public static void OnPlayerChat(PlayerChatEventArgs e)
         {
-            if (e.Player == null || Configuration == null)
+            if (e.Player == null || Configuration == null || !Configuration.Enabled)
                 return;
 
             byte playerSlot = (byte)e.Player.Index;
@@ -133,7 +133,7 @@ namespace NoBotz.Helpers
 
         private static void Kick(byte playerSlot, string message)
         {
-            if (Configuration == null || !Configuration.KickOnTrip)
+            if (Configuration == null || !Configuration.KickOnTrip || !Configuration.Enabled)
                 return;
 
             if (playerSlot == 255)
@@ -193,7 +193,7 @@ namespace NoBotz.Helpers
 
         public static void OnNetGetData(GetDataEventArgs e)
         {
-            if (Configuration == null)
+            if (Configuration == null || !Configuration.Enabled)
                 return;
 
             int packetType = (int)e.MsgID;
@@ -251,7 +251,7 @@ namespace NoBotz.Helpers
 
         public static void OnPlayerInfo(object? sender, PlayerInfoEventArgs e)
         {
-            if (Configuration == null)
+            if (Configuration == null || !Configuration.Enabled)
                 return;
 
             var player = e.Player;

@@ -13,6 +13,8 @@ namespace NoBotz.Misc
         [JsonIgnore]
         private readonly string? _configPath;
 
+        public bool Enabled { get; set; }
+
         public bool BlockTemporarilyOnTrip { get; set; }
 
         public int TimeoutInMSUntilBlockRemoved { get; set; }
@@ -53,6 +55,7 @@ namespace NoBotz.Misc
 
             File.WriteAllText(_configPath, JsonSerializer.Serialize(new Configuration(string.Empty)
             {
+                Enabled = true,
                 BlockTemporarilyOnTrip = true,
                 DisconnectAllFromSameIPOnBlock = true,
                 TimeoutInMSUntilBlockRemoved = 1000 * 60 * 2,
@@ -116,6 +119,7 @@ namespace NoBotz.Misc
 
                 if (loadedConfig != null)
                 {
+                    Enabled = loadedConfig.Enabled;
                     BlockTemporarilyOnTrip = loadedConfig.BlockTemporarilyOnTrip;
                     TimeoutInMSUntilBlockRemoved = loadedConfig.TimeoutInMSUntilBlockRemoved;
                     DisconnectAllFromSameIPOnBlock = loadedConfig.DisconnectAllFromSameIPOnBlock;

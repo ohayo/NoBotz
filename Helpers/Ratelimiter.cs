@@ -28,7 +28,7 @@ namespace NoBotz.Helpers
 
         public static int CheckRateLimit(int playerId, int packetId)
         {
-            if (Watchdog.Configuration == null)
+            if (Watchdog.Configuration == null || !Watchdog.Configuration.Enabled)
                 return -1;
 
             var PacketRateLimits = Watchdog.Configuration.PacketTypeToMaxPerTimeFrame;

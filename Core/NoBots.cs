@@ -47,6 +47,7 @@ namespace NoBotz.Core
 
             ServerApi.Hooks.NetGetData.Register(this, new HookHandler<GetDataEventArgs>(Watchdog.OnNetGetData));
             ServerApi.Hooks.ServerLeave.Register(this, new HookHandler<LeaveEventArgs>(Watchdog.OnPlayerLeave));
+
             PlayerHooks.PlayerCommand += Watchdog.OnPlayerCommand;
             PlayerHooks.PlayerChat += Watchdog.OnPlayerChat;
 

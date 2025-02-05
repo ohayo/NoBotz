@@ -92,8 +92,8 @@ namespace NoBotz.Misc
                         { 125, 150 },  // SyncTilePicking
                         { 128, 100 },  // LandGolfBallInCup
                         { 134, 100 },  // UpdatePlayerLuckFactors
-                        { 201, 50 }, //Fake packet id for chat (packet 82 + 2) - also applies to commands used
-                        { 202, 500 }, //Fake packet id for particles (packet 82 + 9)
+                        { 201, 50 }, //Fake packet id for chat (packet 82 + 1) - also applies to commands used
+                        { 209, 500 }, //Fake packet id for particles (packet 82 + 9)
                     },
                 PacketTypeToMinAndMaxLengths = new Dictionary<int, KeyValuePair<int, int>>()
                     {

@@ -6,6 +6,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Sockets;
+using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -191,6 +193,48 @@ namespace NoBotz.Helpers
             return packets.Contains(packetType);
         }
 
+        private static bool OnNetModule(byte playerSlot, TSPlayer player, ushort moduleId, int packetLength)
+        {
+            if (Configuration == null || !Configuration.Enabled)
+                return false;
+
+            int packetType = 200 + moduleId;
+
+            if (Configuration.PacketTypeToMinAndMaxLengths.ContainsKey(packetType))
+            {
+                var outValue = Configuration.PacketTypeToMinAndMaxLengths[packetType];
+
+                if (packetLength < outValue.Key || packetLength >= outValue.Value)
+                {
+                    TShock.Log.ConsoleInfo($"Detected packet limits broken of packetId: {packetType} (net module ID: {moduleId}) from {player.Name} (player ID: {playerSlot}) (~{packetLength} length)");
+
+                    Kick(playerSlot, "Character Abnormality Detected");
+                    return true;
+                }
+            }
+
+            var PacketTypeToMaxPerTimeFrame = Configuration.PacketTypeToMaxPerTimeFrame;
+
+            if (PacketTypeToMaxPerTimeFrame.ContainsKey(packetType))
+            {
+                int packetAmount = Ratelimiter.CheckRateLimit(playerSlot, packetType);
+
+                if (packetAmount > 0 && !Ratelimiter.HasNotifiedOfAbuse((byte)packetType, playerSlot))
+                {
+                    TShock.Log.ConsoleInfo($"Detected packet spam of packetId: {packetType} (net module ID: {moduleId}) from {player.Name} (player ID: {playerSlot}) (~{packetAmount} packets received)");
+
+                    if (!Ratelimiter.Notified.ContainsKey(playerSlot))
+                        Ratelimiter.Notified[playerSlot] = new HashSet<byte>();
+
+                    Ratelimiter.Notified[playerSlot].Add((byte)packetType);
+                    Kick(playerSlot, "Character Abnormality Detected");
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         public static void OnNetGetData(GetDataEventArgs e)
         {
             if (Configuration == null || !Configuration.Enabled)
@@ -213,6 +257,22 @@ namespace NoBotz.Helpers
 
             if (playerSlot < 255 && player != null && player.Active && player.FinishedHandshake)
             {
+                if (packetType == 82)
+                {
+                    using (var stream = new MemoryStream(e.Msg.readBuffer))
+                    {
+                        stream.Position = e.Index;
+
+                        using (var reader = new BinaryReader(stream))
+                        {
+                            ushort moduleId = reader.ReadUInt16();
+
+                            e.Handled = OnNetModule(playerSlot, player, moduleId, packetLength);
+                        }
+                    }
+                    return;
+                }
+
                 if (Configuration.EnforcePacketLengthLimits && Configuration.PacketTypeToMinAndMaxLengths.ContainsKey(packetType))
                 {
                     var outValue = Configuration.PacketTypeToMinAndMaxLengths[packetType];

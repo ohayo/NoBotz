@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Terraria;
+using Terraria.Localization;
 using TerrariaApi.Server;
 using TShockAPI;
 using TShockAPI.Hooks;
@@ -45,6 +46,7 @@ namespace NoBotz.Core
 
             Commands.ChatCommands.Add(new Command(new List<string>() { "*", "nobots.management" }, HandleNoBotsManagement, "nobots"));
 
+            ServerApi.Hooks.ServerJoin.Register(this, new HookHandler<JoinEventArgs>(Watchdog.OnPlayerJoin));
             ServerApi.Hooks.NetGetData.Register(this, new HookHandler<GetDataEventArgs>(Watchdog.OnNetGetData));
             ServerApi.Hooks.ServerLeave.Register(this, new HookHandler<LeaveEventArgs>(Watchdog.OnPlayerLeave));
 
@@ -349,6 +351,89 @@ namespace NoBotz.Core
                 default:
                     args.Player.SendErrorMessage("Invalid command. Use /nobots help for options.");
                     break;
+                case "captcha":
+                    {
+                        if (parameters.Count() < 3)
+                        {
+                            args.Player.SendErrorMessage("Missing arguments for captcha state toggling. Expected on/off but got nothing. (Example of proper usage: /nobots config captcha on)");
+                            return;
+                        }
+
+                        bool newState = parameters[2].ToLower() == "on";
+
+                        Watchdog.Configuration.Captcha = newState;
+
+                        args.Player.SendMessage($"[c/FFFFFF:NoBots Captcha has been] {(Watchdog.Configuration.Captcha ? ("[c/00FF00:Enabled]") : ("[c/FF0000:Disabled]"))}.", 255, 255, 255);
+
+                        Watchdog.Configuration.Save();
+                    }
+                    break;
+                case "beforejoincaptcha":
+                    {
+                        if (parameters.Count() < 3)
+                        {
+                            args.Player.SendErrorMessage("Missing arguments for before join captcha state toggling. Expected on/off but got nothing. (Example of proper usage: /nobots config beforejoincaptcha on)");
+                            return;
+                        }
+
+                        bool newState = parameters[2].ToLower() == "on";
+
+                        Watchdog.Configuration.CaptchaBeforeJoin = newState;
+
+                        if (!Watchdog.Configuration.Captcha && Watchdog.Configuration.CaptchaBeforeJoin)
+                            Watchdog.Configuration.Captcha = true;
+
+                        args.Player.SendMessage($"[c/FFFFFF:NoBots CaptchaBeforeJoin has been] {(Watchdog.Configuration.CaptchaBeforeJoin ? ("[c/00FF00:Enabled]") : ("[c/FF0000:Disabled]"))}.", 255, 255, 255);
+
+                        Watchdog.Configuration.Save();
+                    }
+                    break;
+                case "captchalength":
+                    {
+                        if (parameters.Count() < 3)
+                        {
+                            args.Player.SendErrorMessage("Missing arguments for captcha length changing. Expected a numeric value but got nothing. (Example of proper usage: /nobots config captchalength 5)");
+                            return;
+                        }
+
+                        string captchaLengthRaw = parameters[2];
+
+                        if (!int.TryParse(captchaLengthRaw, out int captchaLength))
+                        {
+                            args.Player.SendErrorMessage("Missing arguments for captcha length changing. Expected a numeric value but got nothing. (Example of proper usage: /nobots config captchalength 5)");
+                            return;
+                        }
+
+                        Watchdog.Configuration.CaptchaLength = captchaLength;
+
+                        args.Player.SendMessage($"[c/FFFFFF:NoBots CaptchaLength has been changed to] {$"[c/00FF00:{Watchdog.Configuration.CaptchaLength}]"}.", 255, 255, 255);
+
+                        Watchdog.Configuration.Save();
+                    }
+                    break;
+                case "tempban":
+                    {
+                        if (parameters.Count() < 3)
+                        {
+                            args.Player.SendErrorMessage("Missing arguments for temp ban on before join captcha failed length in minutes changing. Expected a numeric value but got nothing. (Example of proper usage: /nobots config tempban 30)");
+                            return;
+                        }
+
+                        string captchaBanLengthRaw = parameters[2];
+
+                        if (!int.TryParse(captchaBanLengthRaw, out int captchaBanLength))
+                        {
+                            args.Player.SendErrorMessage("Missing a numeric value argument for the temp ban duration on failing the before join captcha failed (minutes). Usage: /nobots config tempban 30");
+                            return;
+                        }
+
+                        Watchdog.Configuration.TempBanOnCaptchaFailedLengthInMins = captchaBanLength;
+
+                        args.Player.SendMessage($"[c/FFFFFF:NoBots TempBanOnCaptchaFailedLengthInMins has been changed to] {$"[c/00FF00:{Watchdog.Configuration.TempBanOnCaptchaFailedLengthInMins}]"}.", 255, 255, 255);
+
+                        Watchdog.Configuration.Save();
+                    }
+                    break;
                 case "block":
                     {
                         if (parameters.Count() < 3)
@@ -576,6 +661,9 @@ namespace NoBotz.Core
                 args.Player.SendMessage($"[c/FFFFFF:Timeout in milliseconds until IP block is removed:] [c/00FF00:{Watchdog.Configuration.TimeoutInMSUntilBlockRemoved}]ms", Color.White);
                 args.Player.SendMessage($"[c/FFFFFF:Disconnect all clients from the same IP on block is] {(Watchdog.Configuration.DisconnectAllFromSameIPOnBlock ? "[c/00FF00:Enabled]" : "[c/FF0000:Disabled]")}.", Color.White);
                 args.Player.SendMessage($"[c/FFFFFF:Kicking on trip is] {(Watchdog.Configuration.KickOnTrip ? "[c/00FF00:Enabled]" : "[c/FF0000:Disabled]")}.", Color.White);
+                args.Player.SendMessage($"[c/FFFFFF:Captcha is] {(Watchdog.Configuration.Captcha ? "[c/00FF00:Enabled]" : "[c/FF0000:Disabled]")}.", Color.White);
+                args.Player.SendMessage($"[c/FFFFFF:Captcha Before Join is] {(Watchdog.Configuration.CaptchaBeforeJoin ? "[c/00FF00:Enabled]" : "[c/FF0000:Disabled]")}.", Color.White);
+                args.Player.SendMessage($"[c/FFFFFF:Temp Ban In Minutes Upon Before Join Captcha Failed is set to] [c/00FF00:{Watchdog.Configuration.TempBanOnCaptchaFailedLengthInMins}].", Color.White);
                 args.Player.SendMessage($"[c/FFFFFF:Enforcing Packet Length Limits is] {(Watchdog.Configuration.EnforcePacketLengthLimits ? "[c/00FF00:Enabled]" : "[c/FF0000:Disabled]")}.", Color.White);
                 args.Player.SendMessage($"[c/FFFFFF:Enforcing spawning player is] {(Watchdog.Configuration.EnforceSpawningPlayer ? "[c/00FF00:Enabled]" : "[c/FF0000:Disabled]")}.", Color.White);
                 args.Player.SendMessage($"[c/FFFFFF:Enforcing maximum clients is] {(Watchdog.Configuration.EnforceMaxClients ? "[c/00FF00:Enabled]" : "[c/FF0000:Disabled]")}.", Color.White);
@@ -586,6 +674,10 @@ namespace NoBotz.Core
 
                 args.Player.SendMessage("[c/FFD700:Options:]", Color.White);
                 args.Player.SendMessage($"[c/FFA500:- block on/off] (Set to: {(Watchdog.Configuration.BlockTemporarilyOnTrip ? "[c/00FF00:ON]" : "[c/FF0000:OFF]")}) (Toggle blocking of client IPs temporarily on trip)", Color.White);
+                args.Player.SendMessage($"[c/FFA500:- captcha on/off] (Set to: {(Watchdog.Configuration.Captcha ? "[c/00FF00:ON]" : "[c/FF0000:OFF]")}) (Toggle captcha verification on join [Use beforejoincaptcha to set this to before join instead])", Color.White);
+                args.Player.SendMessage($"[c/FFA500:- beforejoincaptcha on/off] (Set to: {(Watchdog.Configuration.CaptchaBeforeJoin ? "[c/00FF00:ON]" : "[c/FF0000:OFF]")}) (Toggle captcha verification for before players join the server - requires captcha to be enabled)", Color.White);
+                args.Player.SendMessage($"[c/FFA500:- captchalength <value>] (Set to: [c/00FF00:{Watchdog.Configuration.CaptchaLength}]) (Adjusts the length of captchas)", Color.White);
+                args.Player.SendMessage($"[c/FFA500:- tempban <valueInMinutes>] (Set to: [c/00FF00:{Watchdog.Configuration.TempBanOnCaptchaFailedLengthInMins}]) (Adjusts the time in minutes players are banned for when they fail the before join captcha)", Color.White);
                 args.Player.SendMessage($"[c/FFA500:- timeoutblock <valueInMilliseconds>] (Set to: [c/00FF00:{Watchdog.Configuration.TimeoutInMSUntilBlockRemoved}]ms) (Adjusts the timeout until an IP block is removed)", Color.White);
                 args.Player.SendMessage($"[c/FFA500:- disconnectall on/off] (Set to: {(Watchdog.Configuration.DisconnectAllFromSameIPOnBlock ? "[c/00FF00:ON]" : "[c/FF0000:OFF]")}) (Toggle disconnection of all clients from the same IP on block)", Color.White);
                 args.Player.SendMessage($"[c/FFA500:- kick on/off] (Set to: {(Watchdog.Configuration.KickOnTrip ? "[c/00FF00:ON]" : "[c/FF0000:OFF]")}) (Toggle kicking players on trip)", Color.White);
@@ -631,6 +723,8 @@ namespace NoBotz.Core
                         args.Player.SendMessage("[c/FFFFFF:Usage: /nobots <option>]", Color.White);
                         args.Player.SendMessage("[c/FFD700:Features:]", Color.White);
                         args.Player.SendMessage("[c/FFA500:- Blocks bots from joining the server]", Color.White);
+                        args.Player.SendMessage("[c/FFA500:- Captcha verification required before packets are processed]", Color.White);
+                        args.Player.SendMessage("[c/FFA500:- Captcha verification required to join the server]", Color.White);
                         args.Player.SendMessage("[c/FFA500:- Prevents multiple clients from the same IP]", Color.White);
                         args.Player.SendMessage("[c/FFA500:- Protects against packet spam & certain exploits]", Color.White);
                         args.Player.SendMessage("[c/FFA500:- Adjustable limits for packet frequency and abuse detection]", Color.White);

@@ -23,6 +23,12 @@ namespace NoBotz.Misc
 
         public bool KickOnTrip { get; set; }
 
+        public bool Captcha { get; set; }
+
+        public bool CaptchaBeforeJoin { get; set; }
+
+        public int CaptchaLength { get; set; }
+
         public bool EnforcePacketLengthLimits { get; set; }
 
         public bool EnforceSpawningPlayer { get; set; }
@@ -32,6 +38,8 @@ namespace NoBotz.Misc
         public bool KickPacketsFromHandshakeBypass { get; set; }
 
         public int MaxClientsPerIP { get; set; }
+
+        public int TempBanOnCaptchaFailedLengthInMins { get; set; }
 
         public int MaxSecondsUntilSpawnNecessary { get; set; }
 
@@ -59,6 +67,10 @@ namespace NoBotz.Misc
                 BlockTemporarilyOnTrip = true,
                 DisconnectAllFromSameIPOnBlock = true,
                 TimeoutInMSUntilBlockRemoved = 1000 * 60 * 2,
+                Captcha = false,
+                CaptchaBeforeJoin = false,
+                CaptchaLength = 20,
+                TempBanOnCaptchaFailedLengthInMins = 30,
                 KickOnTrip = true,
                 EnforcePacketLengthLimits = false,
                 EnforceSpawningPlayer = true,
@@ -124,6 +136,10 @@ namespace NoBotz.Misc
                     TimeoutInMSUntilBlockRemoved = loadedConfig.TimeoutInMSUntilBlockRemoved;
                     DisconnectAllFromSameIPOnBlock = loadedConfig.DisconnectAllFromSameIPOnBlock;
                     KickOnTrip = loadedConfig.KickOnTrip;
+                    Captcha = loadedConfig.Captcha;
+                    CaptchaBeforeJoin = loadedConfig.CaptchaBeforeJoin;
+                    CaptchaLength = loadedConfig.CaptchaLength;
+                    TempBanOnCaptchaFailedLengthInMins = loadedConfig.TempBanOnCaptchaFailedLengthInMins;
                     EnforcePacketLengthLimits = loadedConfig.EnforcePacketLengthLimits;
                     EnforceSpawningPlayer = loadedConfig.EnforceSpawningPlayer;
                     EnforceMaxClients = loadedConfig.EnforceMaxClients;

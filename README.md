@@ -19,6 +19,7 @@
  If you only want notifications about suspicious activity without kicking players, set "KickOnTrip" to false. ~~An option to temporarily ban the player from the server will be added soon.~~
 
  # 🚀 Features 🚀
+ ✅ Captcha system on join & before join. <br>
  ✅ Temporarily block IPs from joining & disconnect all from the same IP on trip. <br>
  ✅ Packet rate limiting to prevent spam and bot abuse. <br>
  ✅ Detection of malicious client behavior to reduce exploits. <br>
